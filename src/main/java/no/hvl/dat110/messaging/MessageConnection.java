@@ -32,36 +32,50 @@ public class MessageConnection {
 		}
 	}
 
-	public void send(Message message) {
+	public Message send(Message message) {
 
-		byte[] data;
-		
-		// TODO - START
-		// encapsulate the data contained in the Message and write to the output stream
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
+		try {
+			// get the data from the message
+			byte[] data = message.getData();
 			
-		// TODO - END
-
+			// write the data length as a single byte to the output stream
+			outStream.writeByte(data.length);
+			
+			// write the data to the output stream
+			outStream.write(data);
+			
+		} catch (IOException ex) {
+			System.out.println("Failed to send message: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+		return message;
 	}
 
 	public Message receive() {
 
 		Message message = null;
-		byte[] data;
 		
-		// TODO - START
-		// read a segment from the input stream and decapsulate data into a Message
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - END
+		try {
+			// read the data length as a single byte from the input stream
+			int length = inStream.readUnsignedByte();
+			
+			// create a byte array to store the data
+			byte[] data = new byte[length];
+			
+			// read the data into the byte array
+			inStream.readFully(data);
+			
+			// create a new message with the received data
+			message = new Message(data);
+			
+		} catch (IOException ex) {
+			System.out.println("Failed to receive message: " + ex.getMessage());
+			ex.printStackTrace();
+		}
 		
 		return message;
-		
 	}
+
 
 	// close the connection by closing streams and the underlying socket	
 	public void close() {

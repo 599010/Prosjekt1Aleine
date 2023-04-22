@@ -13,36 +13,45 @@ public class MessageUtils {
 
 	public static byte[] encapsulate(Message message) {
 		
-		byte[] segment = null;
-		byte[] data;
-		
-		// TODO - START
-		
-		// encapulate/encode the payload data of the message and form a segment
-		// according to the segment format for the messaging layer
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-			
-		// TODO - END
-		return segment;
-		
+	    byte[] segment = new byte[SEGMENTSIZE];
+	    byte[] data = message.getData();
+	    
+	    int payloadLength = data.length;
+	    
+	    if (payloadLength <= 124) {
+	        segment[0] = (byte) payloadLength;
+	        System.arraycopy(data, 0, segment, 1, payloadLength);
+	    } else {
+	        segment[0] = 124;
+	        System.arraycopy(data, 0, segment, 1, 124);
+	        segment[125] = 0;
+	        segment[126] = 0;
+	        segment[127] = 0;
+	        System.arraycopy(data, 124, segment, 128 - payloadLength, payloadLength - 124);
+	    }
+	    
+	    return segment;
 	}
+
+
 
 	public static Message decapsulate(byte[] segment) {
-
-		Message message = null;
 		
-		// TODO - START
-		// decapsulate segment and put received payload data into a message
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - END
-		
-		return message;
-		
+	    int payloadLength = segment[0] & 0xFF;
+	    byte[] payload = new byte[payloadLength];
+	    
+	    if (payloadLength <= 124) {
+	        System.arraycopy(segment, 1, payload, 0, payloadLength);
+	    } else {
+	        System.arraycopy(segment, 1, payload, 0, 124);
+	        System.arraycopy(segment, 128 - payloadLength, payload, 124, payloadLength - 124);
+	    }
+	    
+	    Message message = new Message(payload);
+	    
+	    return message;
 	}
+
+
 	
 }
